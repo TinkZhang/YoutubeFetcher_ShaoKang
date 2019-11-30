@@ -1,0 +1,89 @@
+from pytube import YouTube
+from pytube import Playlist
+from datetime import datetime
+import leancloud
+import os
+from dotenv import load_dotenv
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+def alreadyExit(link):
+    Video = leancloud.Object.extend("Video")
+    query = Video.query
+    query.equal_to('link', link)
+    num = query.count()
+    return num != 0
+
+def getDate(title):
+    day = int(title[-2:])
+    month = int(title[-4:-2])
+    year = int(title[-8:-4])
+    return datetime(year,month, day)
+
+def createLeanEntry(title, link, file):
+    Video = leancloud.Object.extend('Video')
+    test_object = Video()
+    test_object.set('title', title)
+    test_object.set('Date', getDate(title))
+    test_object.set('link', link)
+    test_object.add('attachements', file)
+    test_object.save()
+    print(bcolors.OKGREEN, "LeanEntry has been created: ", str(test_object), bcolors.ENDC)
+
+load_dotenv()
+APP_ID = os.getenv("APP_ID")
+APP_KEY = os.getenv("APP_KEY")
+leancloud.init(APP_ID, APP_KEY)
+
+# filename = '【完整版下集】扁回韓國瑜痔瘡說：歹年冬搞肖郎 受刑人不甘寂寞？ 少康戰情室 20191127.webm'
+
+playlist_url = "https://www.youtube.com/watch?v=e1HnS2bi4KY&list=PL64Si-sSRnvbUf3hUoFvrq4LyMiiRf7kb"
+itag = '249'
+pl = Playlist(playlist_url)
+try:
+    links = pl.parse_links()
+except:
+    print(bcolors.FAIL, "Failed ot parse the link", bcolors.ENDC)
+
+for link in links[0:3]:
+    print(bcolors.HEADER, 'Working on link: www.youtube.com', link, bcolors.ENDC)
+    if alreadyExit(link):
+        print(bcolors.OKBLUE, 'This video is already uploaded.', bcolors.ENDC)
+        continue
+    else:
+        try:
+            yt = YouTube(link)
+        except:
+            print(bcolors.FAIL, "This video is unavailable.", bcolors.ENDC)
+            continue
+
+        audio = yt.streams.get_by_itag(itag)
+        title = audio.title
+        filename = audio.default_filename
+        print(bcolors.OKBLUE, "Start downloading...", bcolors.ENDC)
+        print(bcolors.OKBLUE, "Title: ", title, bcolors.ENDC)
+        try:
+            audio.download()
+            print(bcolors.OKGREEN, "Video has been downloaded.", bcolors.ENDC)
+        except:
+            print(bcolors.FAIL, "Failed to download.", bcolors.ENDC)
+
+        with open(filename, 'rb') as f:
+            file = leancloud.File(filename, f)
+            try:
+                print(bcolors.OKBLUE, "Start uploading to LeanCloud...", bcolors.ENDC)
+                file.save()
+                print(bcolors.OKGREEN, "Video has been uploaded.", bcolors.ENDC)
+            except:
+                print(bcolors.FAIL, "Failed to upload video to LeanCloud.", bcolors.ENDC)
+            
+            createLeanEntry(title, link, file)
+        os.remove(filename)
