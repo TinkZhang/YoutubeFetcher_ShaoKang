@@ -26,7 +26,11 @@ def getDate(title):
     day = int(title[-2:])
     month = int(title[-4:-2])
     year = int(title[-8:-4])
-    return datetime(year,month, day)
+    try:
+        date = datetime(year, month, day)
+    except:
+        date = datetime(datetime.now().year, datetime.now().month, datetime.now().day)
+    return date
 
 def createLeanEntry(title, link, file):
     Video = leancloud.Object.extend('Video')
