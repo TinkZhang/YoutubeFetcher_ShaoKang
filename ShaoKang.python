@@ -70,6 +70,10 @@ for link in links[0:3]:
             continue
 
         audio = yt.streams.get_by_itag(itag)
+        if audio is not None:
+            audio = yt.streams.get_by_itag(251)
+            if audio is not None:
+                audio = yt.streams.get_by_itag(140)
         title = audio.title
         filename = audio.default_filename
         print(bcolors.OKBLUE, "Start downloading...", bcolors.ENDC)
