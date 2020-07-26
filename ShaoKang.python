@@ -3,7 +3,7 @@ from pytube import Playlist
 from datetime import datetime
 import leancloud
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 class bcolors:
     HEADER = '\033[95m'
@@ -42,7 +42,7 @@ def createLeanEntry(title, link, file):
     test_object.save()
     print(bcolors.OKGREEN, "LeanEntry has been created: ", str(test_object), bcolors.ENDC)
 
-load_dotenv(verbose=True)
+load_dotenv(find_dotenv())
 APP_ID = os.getenv("APP_ID")
 APP_KEY = os.getenv("APP_KEY")
 leancloud.init(APP_ID, APP_KEY)
