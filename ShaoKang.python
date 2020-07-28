@@ -49,11 +49,11 @@ leancloud.init(APP_ID, APP_KEY)
 
 # filename = '【完整版下集】扁回韓國瑜痔瘡說：歹年冬搞肖郎 受刑人不甘寂寞？ 少康戰情室 20191127.webm'
 
-playlist_url = "https://www.youtube.com/watch?v=e1HnS2bi4KY&list=PL64Si-sSRnvbUf3hUoFvrq4LyMiiRf7kb"
+playlist_url = "https://www.youtube.com/watch?v=XefMOQuxrdU&list=PL64Si-sSRnvbUf3hUoFvrq4LyMiiRf7kb"
 itag = '249'
 pl = Playlist(playlist_url)
 try:
-    links = pl.parse_links()
+    links = pl.video_urls()
 except:
     print(bcolors.FAIL, "Failed ot parse the link", bcolors.ENDC)
 
